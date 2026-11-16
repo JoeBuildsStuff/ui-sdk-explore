@@ -17,7 +17,7 @@ import { useHash } from "./use-hash"
 type NavLink = {
   label: string
   href: string
-  icon: ComponentType<{ "aria-hidden"?: boolean }>
+  icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>
 }
 
 const mainLinks: NavLink[] = [
@@ -85,17 +85,21 @@ function Sidebar() {
       title={link.label}
       aria-current={active === link.href ? "page" : undefined}
       data-active={active === link.href ? "" : undefined}
+      className="justify-start gap-2 group-data-collapsed:justify-center data-active:bg-(--ui-muted) data-active:font-semibold"
       render={<a href={link.href} />}
     >
-      <link.icon aria-hidden />
-      <span className="sidebar-label">{link.label}</span>
+      <link.icon aria-hidden className="size-4 shrink-0" />
+      <span className="group-data-collapsed:hidden">{link.label}</span>
     </Button>
   )
 
   return (
-    <aside className="sidebar" data-collapsed={collapsed ? "" : undefined}>
-      <div className="sidebar-header">
-        <h2 className="sidebar-title">ui-sdk-explore</h2>
+    <aside
+      className="group flex w-64 shrink-0 flex-col border-r border-(--ui-border) p-4 transition-[width] duration-150 data-collapsed:w-14 data-collapsed:px-2"
+      data-collapsed={collapsed ? "" : undefined}
+    >
+      <div className="mb-4 flex items-center justify-between gap-2 group-data-collapsed:flex-col">
+        <h2 className="text-base font-semibold group-data-collapsed:hidden">ui-sdk-explore</h2>
         <Toggle
           aria-label="Collapse sidebar"
           aria-keyshortcuts={toggleHint.ariaKeyshortcuts}
@@ -106,9 +110,10 @@ function Sidebar() {
           {collapsed ? "»" : "«"}
         </Toggle>
       </div>
-      <InputGroup className="sidebar-filter">
+      <InputGroup className="relative mb-3 flex items-center group-data-collapsed:hidden">
         <Input
           type="search"
+          className="w-full pr-8 [&::-webkit-search-cancel-button]:hidden"
           controller={filter}
           aria-label="Filter links"
           aria-keyshortcuts={filterHint.ariaKeyshortcuts}
@@ -116,16 +121,22 @@ function Sidebar() {
           value={query}
           onValueChange={setQuery}
         />
-        <InputClear aria-label="Clear filter">
-          <XIcon aria-hidden="true" />
+        <InputClear
+          aria-label="Clear filter"
+          className="absolute right-1 size-6 border-0 bg-transparent p-0"
+        >
+          <XIcon aria-hidden="true" className="size-3.5" />
         </InputClear>
       </InputGroup>
-      <nav aria-label="Main">
+      <nav aria-label="Main" className="flex flex-col gap-1">
         {visibleMain.map(renderLink)}
         {visibleMain.length > 0 && visibleOther.length > 0 && <Separator />}
         {visibleOther.map(renderLink)}
         {visibleMain.length + visibleOther.length === 0 && (
-          <p className="sidebar-empty" role="status">
+          <p
+            className="my-2 text-sm text-(--ui-muted-foreground) group-data-collapsed:hidden"
+            role="status"
+          >
             No matching links
           </p>
         )}

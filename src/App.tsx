@@ -6,10 +6,12 @@ export default function App() {
   const section = useHash("#home").slice(1)
 
   return (
-    <div className="layout">
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main>
-        <h1>{section.charAt(0).toUpperCase() + section.slice(1)}</h1>
+      <main className="flex-1 p-8">
+        <h1 className="mb-4 text-2xl font-bold">
+          {section.charAt(0).toUpperCase() + section.slice(1)}
+        </h1>
         <SaveButton />
       </main>
     </div>
