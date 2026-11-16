@@ -1,29 +1,84 @@
-import { useState } from "react"
+import { useState, type ComponentType } from "react"
 import { Button } from "@ui-sdk/react/button"
+import { createInputController, Input, InputClear, InputGroup } from "@ui-sdk/react/input"
 import { Separator } from "@ui-sdk/react/separator"
 import { useShortcut, useShortcutHint } from "@ui-sdk/react/shortcuts"
 import { Toggle } from "@ui-sdk/react/toggle"
+import {
+  BookOpenIcon,
+  BoxesIcon,
+  HomeIcon,
+  SettingsIcon,
+  XIcon,
+} from "lucide-react"
 
 import { useHash } from "./use-hash"
 
-const mainLinks = [
-  { label: "Home", href: "#home" },
-  { label: "Components", href: "#components" },
-  { label: "Docs", href: "#docs" },
+type NavLink = {
+  label: string
+  href: string
+  icon: ComponentType<{ "aria-hidden"?: boolean }>
+}
+
+const mainLinks: NavLink[] = [
+  { label: "Home", href: "#home", icon: HomeIcon },
+  { label: "Components", href: "#components", icon: BoxesIcon },
+  { label: "Docs", href: "#docs", icon: BookOpenIcon },
 ]
 
-const otherLinks = [{ label: "Settings", href: "#settings" }]
+const otherLinks: NavLink[] = [
+  { label: "Settings", href: "#settings", icon: SettingsIcon },
+]
+
+const storageKey = "sidebar-collapsed"
+
+function readCollapsed() {
+  try {
+    return localStorage.getItem(storageKey) === "true"
+  } catch {
+    return false
+  }
+}
+
+function writeCollapsed(value: boolean) {
+  try {
+    localStorage.setItem(storageKey, String(value))
+  } catch {
+    // Storage can be blocked; the sidebar still works for this visit.
+  }
+}
 
 function Sidebar() {
   const active = useHash("#home")
-  const [collapsed, setCollapsed] = useState(false)
-  const hint = useShortcutHint("mod+b")
+  const [collapsed, setCollapsedState] = useState(readCollapsed)
+  const [query, setQuery] = useState("")
+  const [filter] = useState(createInputController)
+  const toggleHint = useShortcutHint("mod+b")
+  const filterHint = useShortcutHint("/")
 
-  useShortcut("mod+b", () => setCollapsed((value) => !value), {
+  const setCollapsed = (value: boolean) => {
+    setCollapsedState(value)
+    writeCollapsed(value)
+  }
+
+  useShortcut("mod+b", () => setCollapsed(!collapsed), {
     description: "Toggle sidebar",
   })
+  useShortcut(
+    "/",
+    () => {
+      setCollapsed(false)
+      filter.focus()
+    },
+    { description: "Filter sidebar links" }
+  )
 
-  const renderLink = (link: { label: string; href: string }) => (
+  const needle = collapsed ? "" : query.trim().toLowerCase()
+  const matches = (link: NavLink) => link.label.toLowerCase().includes(needle)
+  const visibleMain = mainLinks.filter(matches)
+  const visibleOther = otherLinks.filter(matches)
+
+  const renderLink = (link: NavLink) => (
     <Button
       key={link.href}
       aria-label={link.label}
@@ -32,9 +87,7 @@ function Sidebar() {
       data-active={active === link.href ? "" : undefined}
       render={<a href={link.href} />}
     >
-      <span aria-hidden="true" className="sidebar-initial">
-        {link.label[0]}
-      </span>
+      <link.icon aria-hidden />
       <span className="sidebar-label">{link.label}</span>
     </Button>
   )
@@ -45,18 +98,37 @@ function Sidebar() {
         <h2 className="sidebar-title">ui-sdk-explore</h2>
         <Toggle
           aria-label="Collapse sidebar"
-          aria-keyshortcuts={hint.ariaKeyshortcuts}
-          title={`Collapse sidebar (${hint.text})`}
+          aria-keyshortcuts={toggleHint.ariaKeyshortcuts}
+          title={`Collapse sidebar (${toggleHint.text})`}
           pressed={collapsed}
           onPressedChange={setCollapsed}
         >
           {collapsed ? "»" : "«"}
         </Toggle>
       </div>
+      <InputGroup className="sidebar-filter">
+        <Input
+          type="search"
+          controller={filter}
+          aria-label="Filter links"
+          aria-keyshortcuts={filterHint.ariaKeyshortcuts}
+          placeholder={`Filter (${filterHint.text})`}
+          value={query}
+          onValueChange={setQuery}
+        />
+        <InputClear aria-label="Clear filter">
+          <XIcon aria-hidden="true" />
+        </InputClear>
+      </InputGroup>
       <nav aria-label="Main">
-        {mainLinks.map(renderLink)}
-        <Separator />
-        {otherLinks.map(renderLink)}
+        {visibleMain.map(renderLink)}
+        {visibleMain.length > 0 && visibleOther.length > 0 && <Separator />}
+        {visibleOther.map(renderLink)}
+        {visibleMain.length + visibleOther.length === 0 && (
+          <p className="sidebar-empty" role="status">
+            No matching links
+          </p>
+        )}
       </nav>
     </aside>
   )

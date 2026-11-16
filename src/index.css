@@ -59,22 +59,16 @@ main {
   font-weight: 600;
 }
 
-.sidebar-initial {
-  display: none;
-}
-
 .sidebar[data-collapsed] {
   width: 3.5rem;
   padding-inline: 0.5rem;
 }
 
 .sidebar[data-collapsed] .sidebar-title,
-.sidebar[data-collapsed] .sidebar-label {
+.sidebar[data-collapsed] .sidebar-label,
+.sidebar[data-collapsed] .sidebar-filter,
+.sidebar[data-collapsed] .sidebar-empty {
   display: none;
-}
-
-.sidebar[data-collapsed] .sidebar-initial {
-  display: inline;
 }
 
 .sidebar[data-collapsed] .sidebar-header {
@@ -83,4 +77,50 @@ main {
 
 .sidebar[data-collapsed] nav a {
   justify-content: center;
+}
+
+.sidebar nav a svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-filter {
+  margin-bottom: 0.75rem;
+}
+
+.sidebar-empty {
+  margin: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--ui-muted-foreground);
+}
+
+.sidebar-filter {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-filter input {
+  width: 100%;
+  padding-right: 2rem;
+}
+
+.sidebar-filter input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.sidebar-filter [data-slot="input-clear"] {
+  position: absolute;
+  right: 0.25rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.sidebar-filter [data-slot="input-clear"] svg {
+  width: 0.875rem;
+  height: 0.875rem;
 }
