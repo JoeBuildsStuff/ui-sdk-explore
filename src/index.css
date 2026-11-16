@@ -6,6 +6,34 @@ body {
   font-family: system-ui, sans-serif;
 }
 
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 16rem;
+  flex-shrink: 0;
+  padding: 1rem;
+  border-right: 1px solid var(--ui-border);
+}
+
+.sidebar-title {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+}
+
+.sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar nav a {
+  justify-content: flex-start;
+}
+
 main {
+  flex: 1;
   padding: 2rem;
 }
